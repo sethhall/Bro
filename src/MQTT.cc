@@ -18,7 +18,6 @@ MQTT_Analyzer::MQTT_Analyzer(Connection* c)
 	interp = new binpac::MQTT::MQTT_Conn(this);
 	
 	had_gap = false;
-	
 	}
 
 MQTT_Analyzer::~MQTT_Analyzer()
