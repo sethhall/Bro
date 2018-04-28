@@ -4,11 +4,11 @@ refine flow MQTT_Flow += {
 	function proc_mqtt_message(msg: MQTT_PDU): bool
 		%{
 
-     		if (${msg.msg_type} == MQTT_CONNECT) {
+			if (${msg.msg_type} == MQTT_CONNECT) {
 			vector<MQTT_connect*>* options = ${msg.conn_packet};
 			vector<MQTT_connect*>::const_iterator ptr;
 			StringVal* protocol_name = 0;
-  			string willtopic, willmsg, willuname, willpass;
+			string willtopic, willmsg, willuname, willpass;
 			int protocol_version = 0;
 			int connect_flags = 0;
 			uint16 keep_alive = 0;
@@ -47,15 +47,15 @@ refine flow MQTT_Flow += {
 			for ( ptr = connack->begin(); ptr != connack->end(); ++ptr ) {
 				return_code = (int)(*ptr)->return_code();
 			}
-			switch (return_code){ 
-				case 0: cout << "Connection Accepted" << endl; break;
-				case 1: cout << "Connection Refused: unacceptable protocol version" << endl; break;
-				case 2: cout << "Connection Refused: identifier rejected" << endl; break;
-				case 3: cout << "Connection Refused: server unavailable" << endl; break;
-				case 4: cout << "Connection Refused: bad user name or password" << endl; break;
-				case 5: cout << "Connection Refused: not authorized" << endl; break;
-			}
-			cout << endl;
+			//switch (return_code){ 
+			//	case 0: cout << "Connection Accepted" << endl; break;
+			//	case 1: cout << "Connection Refused: unacceptable protocol version" << endl; break;
+			//	case 2: cout << "Connection Refused: identifier rejected" << endl; break;
+			//	case 3: cout << "Connection Refused: server unavailable" << endl; break;
+			//	case 4: cout << "Connection Refused: bad user name or password" << endl; break;
+			//	case 5: cout << "Connection Refused: not authorized" << endl; break;
+			//}
+			//cout << endl;
 			BifEvent::generate_mqtt_connack(connection()->bro_analyzer(), connection()->bro_analyzer()->Conn(), ${msg.msg_type}, 
 									return_code);
 			return true;
