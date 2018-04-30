@@ -36,6 +36,9 @@ refine flow MQTT_Flow += {
 			                                payload);
 			}
 
+		// If a publish message was seen, let's say that confirms it.
+		connection()->bro_analyzer()->ProtocolConfirmation();
+
 		return true;
 		%}
 };

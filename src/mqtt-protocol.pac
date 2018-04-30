@@ -49,7 +49,8 @@ refine connection MQTT_Conn += {
 			multiplier *= 128;
 			if ( multiplier > 128*128*128 )
 				{
-				reporter->Weird(this->bro_analyzer()->Conn(), "MQTT malformed remaining length");
+				// This is definitely a protocol violation
+				this->bro_analyzer()->ProtocolViolation("malformed 'remaining length'");
 				return 0;
 				}
 			}

@@ -79,6 +79,8 @@ refine flow MQTT_Flow += {
 			                                m);
 			}
 
+		// If a connect message was seen, let's say that confirms it.
+		connection()->bro_analyzer()->ProtocolConfirmation();
 		return true;
 		%}
 };
