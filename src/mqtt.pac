@@ -7,6 +7,7 @@
 
 %extern{
 	#include "events.bif.h"
+	#include "types.bif.h"
 %}
 
 analyzer MQTT withcontext {
@@ -22,18 +23,25 @@ connection MQTT_Conn(bro_analyzer: BroAnalyzer) {
 
 %include mqtt-protocol.pac
 
-# Now we define the flow:
 flow MQTT_Flow(is_orig: bool) {
-
-	# ## TODO: Determine if you want flowunit or datagram parsing:
-
-	# Using flowunit will cause the anlayzer to buffer incremental input.
-	# This is needed for &oneline and &length. If you don't need this, you'll
-	# get better performance with datagram.
-
 	# flowunit = MQTT_PDU(is_orig) withcontext(connection, this);
 	datagram = MQTT_PDU(is_orig) withcontext(connection, this);
-
 };
 
 %include mqtt-analyzer.pac
+
+%include commands/connect.pac
+%include commands/connack.pac
+%include commands/publish.pac
+%include commands/puback.pac
+%include commands/pubrec.pac
+%include commands/pubrel.pac
+%include commands/pubcomp.pac
+%include commands/subscribe.pac
+%include commands/suback.pac
+%include commands/unsuback.pac
+%include commands/unsubscribe.pac
+%include commands/disconnect.pac
+%include commands/pingreq.pac
+%include commands/pingresp.pac
+

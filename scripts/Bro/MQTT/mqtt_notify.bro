@@ -1,7 +1,6 @@
 ##! This script detects mqtt control packet anomalies
 
 @load base/frameworks/notice
-@load base/protocols/mqtt
 
 module MQTT;
 
@@ -20,7 +19,7 @@ export {
 		};
 }
 
-event mqtt_conn(c: connection, msg_type: count, protocol_name: string, protocol_version: count, client_id: string)
+event mqtt_connect(c: connection, protocol_name: string, protocol_version: count, client_id: string)
 	{
 	if ( protocol_version != 3 && protocol_version != 4 )
 		{
@@ -37,9 +36,9 @@ event mqtt_conn(c: connection, msg_type: count, protocol_name: string, protocol_
 		}
 	}
 
-event mqtt_sub(c: connection, msg_type: count, msg_id: count, subscribe_topic: string, requested_QoS: count)
+event mqtt_subscribe(c: connection, msg_id: count, topic: string, requested_QoS: count)
 	{
-	if (requested_QoS != 1 )
+	if ( requested_QoS != 1 )
 		{
 		NOTICE([$note=Wrong_subscribe_header,
 		        $msg=fmt("%d is an invalid QoS to be requested.", requested_QoS),

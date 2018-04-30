@@ -11,9 +11,7 @@
 using namespace analyzer::MQTT;
 
 MQTT_Analyzer::MQTT_Analyzer(Connection* c)
-
-: tcp::TCP_ApplicationAnalyzer("MQTT", c)
-
+	: tcp::TCP_ApplicationAnalyzer("MQTT", c)
 	{
 	interp = new binpac::MQTT::MQTT_Conn(this);
 	
@@ -27,12 +25,10 @@ MQTT_Analyzer::~MQTT_Analyzer()
 
 void MQTT_Analyzer::Done()
 	{
-	
 	tcp::TCP_ApplicationAnalyzer::Done();
 
 	interp->FlowEOF(true);
 	interp->FlowEOF(false);
-	
 	}
 
 void MQTT_Analyzer::EndpointEOF(bool is_orig)

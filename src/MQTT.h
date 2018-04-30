@@ -5,29 +5,22 @@
 
 #include "events.bif.h"
 
-
 #include "analyzer/protocol/tcp/TCP.h"
 
 #include "mqtt_pac.h"
 
 namespace analyzer { namespace MQTT {
 
-class MQTT_Analyzer
-
-: public tcp::TCP_ApplicationAnalyzer {
+class MQTT_Analyzer: public tcp::TCP_ApplicationAnalyzer {
 
 public:
 	MQTT_Analyzer(Connection* conn);
-	virtual ~MQTT_Analyzer();
+	~MQTT_Analyzer() override;
 
-	// Overriden from Analyzer.
-	virtual void Done();
-	
-	virtual void DeliverStream(int len, const u_char* data, bool orig);
-	virtual void Undelivered(uint64 seq, int len, bool orig);
-
-	// Overriden from tcp::TCP_ApplicationAnalyzer.
-	virtual void EndpointEOF(bool is_orig);
+	void Done() override;
+	void DeliverStream(int len, const u_char* data, bool orig) override;
+	void Undelivered(uint64 seq, int len, bool orig) override;
+	void EndpointEOF(bool is_orig) override;
 	
 
 	static analyzer::Analyzer* InstantiateAnalyzer(Connection* conn)

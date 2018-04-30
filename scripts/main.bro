@@ -1,7 +1,7 @@
 ##! Implements base functionality for MQTT analysis.
-##! Generates the Mqtt.log file.
+##! Generates the mqtt.log file.
 
-module Mqtt;
+module MQTT;
 
 @load ./consts.bro
 
@@ -30,164 +30,194 @@ export {
 
 		topic: string &log;
 
-		QoS: count &log;
+		qos: count &log;
 	};
 
 	## Event that can be handled to access the MQTT record as it is sent on
-	## to the loggin framework.
+	## to the logging framework.
 	global log_mqtt: event(rec: Info);
 }
 
-# TODO: The recommended method to do dynamic protocol detection
-# (DPD) is with the signatures in dpd.sig. If you can't come up
-# with any signatures, then you can do port-based detection by
-# uncommenting the following and specifying the port(s):
-
 const ports = { 1883/tcp };
-
 redef likely_server_ports += { ports };
 
 event bro_init() &priority=5
 	{
-	Log::create_stream(Mqtt::LOG, [$columns=Info, $ev=log_mqtt, $path="mqtt"]);
+	Log::create_stream(MQTT::LOG, [$columns=Info, $ev=log_mqtt, $path="mqtt"]);
 
-	# TODO: If you're using port-based DPD, uncomment this.
 	Analyzer::register_for_ports(Analyzer::ANALYZER_MQTT, ports);
 	}
 
-event mqtt_conn(c: connection, msg_type: count, protocol_name: string, protocol_version: count, client_id: string)
+event mqtt_connect(c: connection, msg: MQTT::ConnectMsg) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
-	info$pname = protocol_name;
-	info$pversion = protocol_version;
-	info$cid = client_id;
+	info$msg_type = "connect";
+	info$pname = msg$protocol_name;
+	info$pversion = msg$protocol_version;
+	info$cid = msg$client_id;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_connack(c: connection, msg_type: count, return_code: count)
+event mqtt_connack(c: connection, return_code: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "connack";
 	info$return_code = return_codes[return_code];
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_pub(c: connection, msg_type: count, msg_id: count, topic: string)
+event mqtt_publish(c: connection, is_orig: bool, msg_id: count, topic: string, payload: string) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "publish";
 	info$msg_id = msg_id;
 	info$topic = topic;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_puback(c: connection, msg_type: count, msg_id: count)
+event mqtt_puback(c: connection, is_orig: bool, msg_id: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "puback";
 	info$msg_id = msg_id;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_sub(c: connection, msg_type: count, msg_id: count, subscribe_topic: string, requested_QoS: count)
+event mqtt_pubrec(c: connection, is_orig: bool, msg_id: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
-	info$msg_id = msg_id;
-	info$topic = subscribe_topic;
-	info$QoS = requested_QoS;
-
-	Log::write(Mqtt::LOG, info);
-	}
-
-event mqtt_suback(c: connection, msg_type: count, msg_id: count, granted_QoS: count)
-	{
-	local info: Info;
-	info$ts  = network_time();
-	info$uid = c$uid;
-	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
-	info$msg_id = msg_id;
-	info$QoS = granted_QoS;
-
-	Log::write(Mqtt::LOG, info);
-	}
-
-event mqtt_unsub(c: connection, msg_type: count, msg_id: count, unsubscribe_topic: string)
-	{
-	local info: Info;
-	info$ts  = network_time();
-	info$uid = c$uid;
-	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
-	info$msg_id = msg_id;
-	info$topic = unsubscribe_topic;
-
-	Log::write(Mqtt::LOG, info);
-	}
-
-event mqtt_unsuback(c: connection, msg_type: count, msg_id: count)
-	{
-	local info: Info;
-	info$ts  = network_time();
-	info$uid = c$uid;
-	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "pubrec";
 	info$msg_id = msg_id;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_pingreq(c: connection, msg_type: count)
+event mqtt_pubrel(c: connection, is_orig: bool, msg_id: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "pubrel";
+	info$msg_id = msg_id;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_pingres(c: connection, msg_type: count)
+event mqtt_pubcomp(c: connection, is_orig: bool, msg_id: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "pubcomp";
+	info$msg_id = msg_id;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
 	}
 
-event mqtt_disconnect(c: connection, msg_type: count)
+
+event mqtt_subscribe(c: connection, msg_id: count, topic: string, requested_qos: count) &priority=5
 	{
 	local info: Info;
 	info$ts  = network_time();
 	info$uid = c$uid;
 	info$id  = c$id;
-	info$msg_type = msg_types[msg_type];
+	info$msg_type = "subscribe";
+	info$msg_id = msg_id;
+	info$topic = topic;
+	info$qos = requested_qos;
 
-	Log::write(Mqtt::LOG, info);
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_suback(c: connection, msg_id: count, granted_qos: count) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "suback";
+	info$msg_id = msg_id;
+	info$qos = granted_qos;
+
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_unsubscribe(c: connection, msg_id: count, topic: string) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "unsubscribe";
+	info$msg_id = msg_id;
+	info$topic = topic;
+
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_unsuback(c: connection, msg_id: count) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "unsuback";
+	info$msg_id = msg_id;
+
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_pingreq(c: connection) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "pingreq";
+
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_pingresp(c: connection) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "pingresp";
+
+	Log::write(MQTT::LOG, info);
+	}
+
+event mqtt_disconnect(c: connection) &priority=5
+	{
+	local info: Info;
+	info$ts  = network_time();
+	info$uid = c$uid;
+	info$id  = c$id;
+	info$msg_type = "disconnect";
+
+	Log::write(MQTT::LOG, info);
 	}
 
