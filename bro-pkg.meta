@@ -1,5 +1,4 @@
 [package]
 description = MQTT protocol analyzer
 tags = mqtt, parser, analyzer, protocol, iot
-script_dir = scripts
 build_command = ./configure --bro-dist=%(bro_dist)s && make
