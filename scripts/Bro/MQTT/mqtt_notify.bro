@@ -19,29 +19,29 @@ export {
 		};
 }
 
-event mqtt_connect(c: connection, protocol_name: string, protocol_version: count, client_id: string)
+event mqtt_connect(c: connection, data: MQTT::ConnectMsg)
 	{
-	if ( protocol_version != 3 && protocol_version != 4 )
+	if ( data$protocol_version != 3 && data$protocol_version != 4 )
 		{
 		NOTICE([$note=Invalid_protocolVersion,
-		        $msg=fmt("%d is not a valid protocol version.", protocol_version),
+		        $msg=fmt("%d is not a valid protocol version.", data$protocol_version),
 		        $conn=c]);
 		}
 	
-	if ( protocol_name != "MQTT" && protocol_name != "MQIsdp")
+	if ( data$protocol_name != "MQTT" && data$protocol_name != "MQIsdp")
 		{
 		NOTICE([$note=Invalid_protocolId,
-		        $msg=fmt("%d is not a valid protocol version.", protocol_name),
+		        $msg=fmt("%d is not a valid protocol version.", data$protocol_name),
 		        $conn=c]);
 		}
 	}
 
-event mqtt_subscribe(c: connection, msg_id: count, topic: string, requested_QoS: count)
+event mqtt_subscribe(c: connection, msg_id: count, topic: string, requested_qos: count)
 	{
-	if ( requested_QoS != 1 )
+	if ( requested_qos != 1 )
 		{
 		NOTICE([$note=Wrong_subscribe_header,
-		        $msg=fmt("%d is an invalid QoS to be requested.", requested_QoS),
+		        $msg=fmt("%d is an invalid QoS to be requested.", requested_qos),
 		        $conn=c]);
 		}
 }
